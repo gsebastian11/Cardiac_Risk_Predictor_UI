@@ -34,9 +34,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
+    <Content Include="templates\login.html" />
     <Content Include="templates\error.html" />
     <Content Include="templates\profilePage.html" />
-    <Content Include="templates\register.html" />
+    <Content Include="templates\registeration.html" />
     <Content Include="templates\UserProfile.html" />
   </ItemGroup>
   <ItemGroup>
