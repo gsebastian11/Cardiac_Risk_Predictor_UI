@@ -32,6 +32,7 @@
   <ItemGroup>
     <Content Include="requirements.txt" />
     <Content Include="templates\profilePage.html" />
+    <Content Include="templates\UserProfile.html" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env1\">

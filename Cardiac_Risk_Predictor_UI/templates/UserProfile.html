@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cardiac Risk Predictor - User Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Cardiac Risk Predictor</h1>
+        <h2>User Profile</h2>
+
+        <!-- Form for creating/editing user profile -->
+        <form method="post" action="/save_profile" class="profile-form">
+            <div class="form-group">
+                <label for="user_id">User ID:</label>
+                <input type="text" id="user_id" name="user_id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="profile_picture">Upload Profile Picture:</label>
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save Profile">
+            </div>
+        </form>
+
+        <!-- Form for deleting user profile -->
+        <form method="post" action="/delete_profile" class="profile-form">
+            <div class="form-group">
+                <label for="user_id_delete">User ID to Delete:</label>
+                <input type="text" id="user_id_delete" name="user_id_delete" required>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Delete Profile">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+
