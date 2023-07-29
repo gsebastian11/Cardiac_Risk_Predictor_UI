@@ -3,6 +3,7 @@ import app
 
 # Database configuration
 DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
+#DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
 
 
 def get_db_connection():
@@ -18,8 +19,7 @@ def create_tables():
         cursor.execute('''
             CREATE TABLE Login (
                 UserId VARCHAR(50) PRIMARY KEY,
-                Password VARCHAR(50),
-                EmailId VARCHAR(100)
+                Password VARCHAR(50)
             )
         ''')
 
@@ -29,34 +29,34 @@ def create_tables():
         cursor.execute('''
             CREATE TABLE PatientDetails (
                 PatientID VARCHAR(50) PRIMARY KEY,
-                Name VARCHAR(100),
                 Age INT,
-                Gender VARCHAR(10),
-                Height FLOAT,
-                Weight FLOAT
+                Gender FLOAT,
+                ChestPainType FLOAT,
+                RestingBP Float,
+                Cholesterol Float,
+                FastingBS Float,
+                RestingEcg Float,
+                Thalach Float,
+                ExAng Float,
+                DepressionInExersise Float,
+                SlopPeakExe Float,
+                NumMajVessels Float,
+                Thalassemia Float
             )
         ''')
 
-    # Create HealthRecord table
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HealthRecord'")
+    # Create UserProfile table
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'UserProfile'")
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
-            CREATE TABLE HealthRecord (
-                PatientID VARCHAR(50) PRIMARY KEY,
-                LDLCholesterol FLOAT,
-                HDLCholesterol FLOAT,
-                TotalCholesterol FLOAT,
-                BP FLOAT,
-                FBS FLOAT,
-                MaxHR FLOAT,
-                RestingECG VARCHAR(50),
-                Exercise BIT,
-                NoofMajorVessels INT,
-                ChestPainType VARCHAR(50),
-                Alcoholic BIT,
-                HeartPatient BIT,
-                BMI FLOAT,
-                Smoking BIT
+            CREATE TABLE UserProfile (
+                PatientID VARCHAR(50) PRIMARY KEY,                
+                UserId VARCHAR(50) REFERENCES Login(UserId),
+                Name VARCHAR(50),
+                EmailId VARCHAR(50),
+                Gender VARCHAR(10),
+                Address VARCHAR(100),
+                PhoneNumber BIGINT
             )
         ''')
 
@@ -74,33 +74,32 @@ def create_tables():
     cursor.close()
     conn.close()
 
-def insert_user_details(user_id, password, email):
+def insert_login_details(user_id, password):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO Login (UserId, Password, EmailId) VALUES (?, ?, ?)', (user_id, password, email))
+    cursor.execute('INSERT INTO Login (UserId, Password) VALUES (?, ?)', (user_id, password))
     conn.commit()
     cursor.close()
     conn.close()
 
-def insert_patient_details(patient_id, name, age, gender, height, weight):
+def insert_patient_details(patient_id, age, gender, chest_pain_type, resting_bp, serum_cholestrole, fasting_bs, 
+                           resting_ecg, maximum_hr, exersise_ia, dep_indu_exersise, slope_peak_exer, num_vessles, thalassemia):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO PatientDetails (PatientID, Name, Age, Gender, Height, Weight) VALUES (?, ?, ?, ?, ?, ?)',
-                   (patient_id, name, age, gender, height, weight))
+    cursor.execute('INSERT INTO PatientDetails (PatientID , UserId ,Age ,Gender ,ChestPainType ,RestingBP ,Cholesterol , FastingBS ,RestingEcg ,Thalach ,ExAng ,DepressionInExersise ,SlopPeakExe ,NumMajVessels ,Thalassemia ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                   (patient_id, age, gender, chest_pain_type, resting_bp, serum_cholestrole, fasting_bs, 
+                    resting_ecg, maximum_hr, exersise_ia, dep_indu_exersise, slope_peak_exer, num_vessles, thalassemia))
     conn.commit()
     cursor.close()
     conn.close()
 
-def insert_health_record(patient_id, ldl_chol, hdl_chol, total_chol, bp, fbs, max_hr, resting_ecg, exercise, major_vessels,
-                         chest_pain_type, alcoholic, heart_patient, bmi, smoking):
+def insert_user_profile(patient_id, user_id, name, email, gender, address, phone_number):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO HealthRecord (PatientID, LDLCholesterol, HDLCholesterol, TotalCholesterol, BP, FBS, MaxHR, RestingECG,
-                                 Exercise, NoofMajorVessels, ChestPainType, Alcoholic, HeartPatient, BMI, Smoking)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (patient_id, ldl_chol, hdl_chol, total_chol, bp, fbs, max_hr, resting_ecg, exercise, major_vessels,
-          chest_pain_type, alcoholic, heart_patient, bmi, smoking))
+        INSERT INTO UserProfile (PatientID, Name, EmailId, Gender, Address, PhoneNumber)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (patient_id, name, email, gender, address, phone_number))
     conn.commit()
     cursor.close()
     conn.close()
@@ -119,7 +118,8 @@ def insert_prediction_result(patient_id, risk_score):
 def update_user_info(user_id, password, email):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('UPDATE Login SET Password = ?, EmailId = ? WHERE UserId = ?', (password, email, user_id))
+    cursor.execute('UPDATE Login SET Password = ? WHERE UserId = ?', (password, user_id))
     conn.commit()
     cursor.close()
     conn.close()
+
