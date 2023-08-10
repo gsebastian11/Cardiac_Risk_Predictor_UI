@@ -82,15 +82,26 @@
     <div class="container">
         <h1>Cardiac Risk Predictor</h1>
         <h1>Log In</h1>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
         <form action="/login" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <input type="submit" value="Sign In">
-            <a href="#" class="forgot-password">Forgot Password?</a>
+            <a href="{{ url_for('userprofile') }}" class="forgot-password">Forgot Password?</a>
         </form>
-        <a href="/registration.html" class="register-btn">Register</a>
+        <a href="{{ url_for('registration') }}" class="register-btn">Register</a>
     </div>
 </body>
 

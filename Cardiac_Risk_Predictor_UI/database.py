@@ -2,12 +2,19 @@ import pyodbc
 import app
 
 # Database configuration
-DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
-#DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
+#DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
+DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
 
 
 def get_db_connection():
     return pyodbc.connect(DATABASE)
+
+class Login:
+    def __init__(self, user_id, username, password):
+        self.id = user_id
+        self.username = username
+        self.password = password
+
 
 def create_tables():
     conn = get_db_connection()
@@ -122,4 +129,23 @@ def update_user_info(user_id, password, email):
     conn.commit()
     cursor.close()
     conn.close()
+
+#Select records
+def get_user_by_username(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT UserId, Password FROM Login WHERE UserId = ?', (username,))
+    user_data = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if user_data:
+        user_id, password = user_data
+        user = Login(user_id, username, password)  # Create a Login instance directly
+        return user
+    
+    return None  # User not found
+
 
