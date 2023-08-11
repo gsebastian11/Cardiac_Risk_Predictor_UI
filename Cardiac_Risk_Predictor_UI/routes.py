@@ -11,7 +11,7 @@ def send_http_post_request(url, payload):
         headers = {'Content-Type': 'application/json'}
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response.raise_for_status()
-        return response
+        return response.json()
     except requests.exceptions.RequestException as e:
         print(f'Error occurred during the request: {e}')
     return None
@@ -120,7 +120,7 @@ def configure_routes(app):
             if request.method == 'POST':
             # Fetch data from the POST request
 
-                patient_id = current_user.id     
+                patient_id = current_user.user_id     
                 age = int(request.form['age'])
                 sex = int(request.form['sex'])
                 cp = int(request.form['cp'])
@@ -141,7 +141,7 @@ def configure_routes(app):
 
                 # Call prediction api
                 url = 'https://cardiac-risk-predictor-api.onrender.com/predict'  
-                payload = {
+                payload = [{
                     "age": age,
                     "sex": sex,
                     "cp":cp,
@@ -155,20 +155,26 @@ def configure_routes(app):
                     "slope": slope,
                     "ca" :ca,
                     "thal" : thal
-                }
+                }]
 
                 response = send_http_post_request(url, payload)
                 if response:
-                    if(int(response[1]) == 1):
+                    risk_score = None
+                    suggestion = None
+                    if(response['prediction_result'] == '[1]'):
                         prediction_result = "High risk of heart disease"
+                        suggestion = "abcd"
+                        risk_score = 1
                     else:
                         prediction_result = "No risk"
+                        suggestion = "efhh"
+                        risk_score = 0
 
                     # Call the insert_prediction_result function with the fetched data
-                    insert_prediction_result(patient_id, int(response[1]))
+                    insert_prediction_result(patient_id, risk_score)
 
                     # Return a response indicating the success of the update
-                    return render_template('prediction_result.html',user=current_user,  prediction_result = prediction_result )
+                    return render_template('prediction_result.html',user=current_user,  prediction_result = prediction_result, suggestion = suggestion)
                 else:
                     return render_template('error.html', error="Sorry, We are experiencing an issue. Please try again later.")
 

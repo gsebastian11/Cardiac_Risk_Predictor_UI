@@ -4,7 +4,7 @@
 <div id="result-container">
     <h1>Cardiac Risk Predictor</h1>
     <h2>Your Heart Health prediction Result:</h2>
-    value="{{ prediction_result.current_user if prediction_result else '' }}"
-    readonly />
+    <p>{{ prediction_result}}</p>
+    <p>{{ suggestion}}</p>
 </div>
 {% endblock %}
