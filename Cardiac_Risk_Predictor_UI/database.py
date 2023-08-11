@@ -19,11 +19,10 @@ class Login:
 class UserProfile:
     def __init__(self, user_id):
         self.user_id = user_id
-        #self.patient_id = patient_id
-        #self.name = name, 
-        #self.email_id = email_id,
-        #self.address = address,
-        #self.phone_number = phone_number
+    
+    def is_authenticated(self):
+        return True
+        
 
 
 def create_tables():
