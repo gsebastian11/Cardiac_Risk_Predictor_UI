@@ -2,7 +2,7 @@ from flask import redirect, render_template, request, session, url_for, jsonify,
 from app import app
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_profile_by_username, get_user_by_password, insert_patient_details
-from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required
+from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
 
 class Login(UserMixin):
     def __init__(self, user_id, username, password):
@@ -28,7 +28,7 @@ def configure_routes(app):
     def userprofile():
         try: 
             if 'username' not in session:
-                return redirect(url_for('login'))
+                return redirect(url_for('login', user=current_user))
 
             if request.method == 'POST':
                 # Fetch data from the POST request
@@ -41,14 +41,15 @@ def configure_routes(app):
                 # Correct the order of arguments for insert_user_profile function
                 user = get_profile_by_username(user_id)
                 if user:
-                    insert_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)
-                else:
                     update_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)
+                    
+                else:
+                    insert_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)
 
                 # Return a response indicating the success of the update
-                return render_template('patient_details.html')
+                return render_template('user_profile.html',user=current_user)
 
-            return render_template('user_profile.html')
+            return render_template('user_profile.html',user=current_user)
 
         except Exception as e:
             return render_template('error.html', error=str(e))
@@ -64,8 +65,8 @@ def configure_routes(app):
                 confirmpwd = request.form.get('confirmPassword')
                 
                 # Check if the user already exists
-                user = get_user_by_username(username)
-                if user:
+                new_user = get_user_by_username(username)
+                if new_user:
                     flash('User already registered. Please use a different username.', category='error')
                 elif password != confirmpwd:
                     flash('Passwords don\'t match.', category='error')
@@ -73,9 +74,10 @@ def configure_routes(app):
                     flash('Password must be at least 7 characters.', category='error')
                 else:
                     insert_login_details(username, password)
+                    session['username'] = username
                     flash('Account created!', category='success')
-                    return render_template('login.html')
-            return render_template('registration.html')
+                    return render_template('login.html', user=current_user)
+            return render_template('registration.html', user=current_user)
         except Exception as e:
             return render_template('error.html', error=str(e))
 
@@ -95,8 +97,9 @@ def configure_routes(app):
 
                 if user:
                     flash('Logged in successfully!', category='success')
+                    #login_user(user, remember=True)
                     session['username'] = username
-                    return redirect(url_for('userprofile'))
+                    return redirect(url_for('userprofile', user=current_user))
                 else:
                     flash('Username or password is incorrect.', category='error')
                     return render_template("login.html", user=current_user)
@@ -106,12 +109,18 @@ def configure_routes(app):
         except Exception as e:
             return render_template('error.html', error=str(e))
 
+    @app.route('/logout')
+    @login_required
+    def logout():
+        logout_user()
+        return redirect(url_for('login'))
+
     @app.route('/patient_details', methods=['GET', 'POST'])
     #@login_required
     def patient_details():
         try: 
             if 'username' not in session:
-                return redirect(url_for('login'))
+                return redirect(url_for('login', user=current_user))
 
             if request.method == 'POST':
             # Fetch data from the POST request
@@ -136,10 +145,16 @@ def configure_routes(app):
                 insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal)
             
                 # Return a response indicating the success of the update
-                return render_template('prediction_result.html')
+                return render_template('prediction_result.html',user=current_user)
 
-            return render_template('patient_details.html')
+            return render_template('patient_details.html', user=current_user)
 
+        except Exception as e:
+            return render_template('error.html', error=str(e))
+
+    def go_to_profile():
+        try:
+            return redirect(url_for('userprofile', user=current_user))  # Redirect to the 'userprofile' route
         except Exception as e:
             return render_template('error.html', error=str(e))
 
