@@ -1,109 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cardiac Risk Predictor</title>
-    <style>
-        body {
-            background-image: url("https://cdn.bangkokhospital.com/2020/04/IHL-Cn-Arrhythmia-and-AF-Clinic.jpg");
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            color: #333;
-        }
-
-        #profile-container {
-            width: 80%;
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            position: relative; /* To allow positioning of the sign-out button */
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: black; /* Changed the title color to black */
-        }
-
-        input[type="text"], input[type="email"], textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        input[type="submit"], button {
-            background-color: #28a745; /* Green color for buttons */
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 48%;
-        }
-
-            input[type="submit"]:hover, button:hover {
-                background-color: #1f8c3b; /* Darker green on hover */
-            }
-
-        .delete-btn {
-            background-color: #28a745; /* Green color for delete button */
-        }
-
-            .delete-btn:hover {
-                background-color: #1f8c3b; /* Darker green on hover */
-            }
-
-        #sign-out-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #333;
-            color: #fff;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-            #sign-out-btn:hover {
-                background-color: #555;
-            }
-    </style>
-</head>
-<body>
-    <div id="profile-container">
-        <h1>Cardiac Risk Predictor</h1>
-        <h2>User Profile</h2>
-        <form method="post">
-            <label for="user_id">User ID:</label>
-            <input type="text" id="user_id" name="user_id" required>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            <label for="phone">Phone Number:</label>
-            <input type="text" id="phone" name="phone" required>
-            <label for="address">Address:</label>
-            <textarea id="address" name="address" rows="4"></textarea>
-            <div class="button-container">
-                <input type="submit" value="Save Profile">
-                <button class="delete-btn">Delete Profile</button>
-            </div>
-        </form>
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<form method="POST">
+    <h3 align="center">Cardiac Risk Predictor</h3>
+    <h3 align="center">Profile</h3>
+    <div class="form-group">
+        <label for="user_id">User ID</label>
+        <input type="text"
+               class="form-control"
+               id="user_id"
+               name="user_id"
+               placeholder="Enter user id" />
+    </div>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text"
+               class="form-control"
+               id="name"
+               name="name"
+               placeholder="Enter name" />
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email"
+               class="form-control"
+               id="email"
+               name="email"
+               placeholder="Enter email" />
+    </div>
+    <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="text"
+               class="form-control"
+               id="phone"
+               name="phone"
+               placeholder="Enter phone number" />
+    </div>
+    <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text"
+               class="form-control"
+               id="address"
+               name="address"
+               placeholder="Enter address" />
     </div>
 
-    <button id="sign-out-btn">Sign Out</button>
-
-</body>
-</html>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %}

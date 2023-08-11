@@ -34,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
+    <Content Include="templates\base.html" />
     <Content Include="templates\login.html" />
     <Content Include="templates\error.html" />
     <Content Include="templates\patient_details.html" />
