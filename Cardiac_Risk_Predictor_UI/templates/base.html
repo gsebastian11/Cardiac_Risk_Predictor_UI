@@ -24,7 +24,8 @@
         <div class="collapse navbar-collapse" id="navbar">
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
-                <a class="nav-item nav-link" id="patient_details" href="/">Patient data</a>
+                <a class="nav-item nav-link" id="patient_details" href="/patient_details">Patient data</a>
+                <a class="nav-item nav-link" id="userprofile" href="/">Profile</a>
                 <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
                 {% else %}
                 <a class="nav-item nav-link" id="login" href="/login">Login</a>

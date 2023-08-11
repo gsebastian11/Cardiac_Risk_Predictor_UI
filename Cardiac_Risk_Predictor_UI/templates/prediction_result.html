@@ -1,76 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cardiac Risk Predictor - PREDICTION RESULT</title>
-    <style>
-        body {
-            background-color: rgba(0, 0, 0, 0.2);
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            color: #000; /* Set all text color to black */
-            text-align: center;
-        }
-
-        #result-container {
-            width: 80%;
-            max-width: 600px;
-            margin: 50px auto; /* Center the container horizontally */
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        h1, h2 {
-            color: #007bff;
-        }
-
-        p {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
-        #sign-out-btn, #previous-page-btn {
-            background-color: #28a745; /* Green color for buttons */
-            color: #fff; /* Set button text color to white */
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-
-            #sign-out-btn:hover, #previous-page-btn:hover {
-                background-color: #1f8c3b; /* Darker green on hover */
-            }
-    </style>
-</head>
-<body>
-
-    <div id="result-container">
-        <h1>Cardiac Risk Predictor</h1>
-        <h2>Your Heart Health prediction Result:</h2>
-        <!-- Add your prediction result content here -->
-        <p>Your prediction result goes here.</p>
-        <p>
-            {{prediction_result}}
-        </p>
-        <!-- Sign Out button -->
-        <button id="sign-out-btn" onclick="signOut()">Sign Out</button>
-
-        <!-- Previous Page button -->
-        <button id="previous-page-btn" onclick="goToPreviousPage()">Previous Page</button>
-    </div>
-
-    <script>function signOut() {
-// Your code to handle sign out goes here
-console.log("Sign Out clicked! Handle the action here.");
-}
-
-function goToPreviousPage() {
-// Your code to navigate to the previous page goes here
-console.log("Previous Page clicked! Handle the action here.");
-}</script>
-
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div id="result-container">
+    <h1>Cardiac Risk Predictor</h1>
+    <h2>Your Heart Health prediction Result:</h2>
+    value="{{ prediction_result.current_user if prediction_result else '' }}"
+    readonly />
+</div>
+{% endblock %}

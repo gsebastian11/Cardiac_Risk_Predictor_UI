@@ -15,6 +15,8 @@ class Login:
         self.id = user_id
         self.username = username
         self.password = password
+    def get_id(self):
+        return str(self.id) 
 
 class UserProfile:
     def __init__(self, user_id):
@@ -22,6 +24,9 @@ class UserProfile:
     
     def is_authenticated(self):
         return True
+
+    def get_id(self):
+        return str(self.id)
         
 
 

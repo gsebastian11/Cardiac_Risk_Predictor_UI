@@ -110,7 +110,7 @@ def configure_routes(app):
                 
                 #user = Login.query.filter_by(username=username, password=password).first()
                 user = get_user_by_password(username, password)
-
+                #force = False;
                 if user:
                     flash('Logged in successfully!', category='success')
                     login_user(user, remember=True,duration=None,force=True)
@@ -132,11 +132,11 @@ def configure_routes(app):
         return redirect(url_for('login'))
 
     @app.route('/patient_details', methods=['GET', 'POST'])
-    #@login_required
+    @login_required
     def patient_details():
         try: 
-            if 'username' not in session:
-                return redirect(url_for('login', user=current_user))
+            #if 'username' not in session:
+            #    return redirect(url_for('login', user=current_user))
 
             if request.method == 'POST':
             # Fetch data from the POST request
