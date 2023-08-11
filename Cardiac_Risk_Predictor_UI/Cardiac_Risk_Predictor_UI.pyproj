@@ -37,6 +37,7 @@
     <Content Include="templates\login.html" />
     <Content Include="templates\error.html" />
     <Content Include="templates\patient_details.html" />
+    <Content Include="templates\prediction_result.html" />
     <Content Include="templates\registration.html" />
     <Content Include="templates\user_profile.html" />
   </ItemGroup>

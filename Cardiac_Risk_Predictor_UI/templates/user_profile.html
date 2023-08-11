@@ -4,45 +4,29 @@
     <title>Cardiac Risk Predictor</title>
     <style>
         body {
-            background-image: url("background_image.jpg");
+            background-image: url("https://cdn.bangkokhospital.com/2020/04/IHL-Cn-Arrhythmia-and-AF-Clinic.jpg");
             background-size: cover;
             font-family: Arial, sans-serif;
-        }
-
-        #profile-picture-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        #profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
+            color: #333;
         }
 
         #profile-container {
             width: 80%;
             max-width: 600px;
             margin: 50px auto;
-            background-color: #f9f9f9;
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        label {
-            font-weight: bold;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            position: relative; /* To allow positioning of the sign-out button */
         }
 
         h1, h2 {
             text-align: center;
-            color: #007bff;
+            color: black; /* Changed the title color to black */
         }
 
-        input[type="text"], input[type="email"], select, textarea {
+        input[type="text"], input[type="email"], textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -50,93 +34,76 @@
             border-radius: 5px;
         }
 
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
         input[type="submit"], button {
-            background-color: #007bff;
+            background-color: #28a745; /* Green color for buttons */
             color: #fff;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            width: 48%;
         }
 
             input[type="submit"]:hover, button:hover {
-                background-color: #0056b3;
+                background-color: #1f8c3b; /* Darker green on hover */
             }
 
         .delete-btn {
-            background-color: #dc3545;
+            background-color: #28a745; /* Green color for delete button */
         }
 
             .delete-btn:hover {
-                background-color: #b02a37;
+                background-color: #1f8c3b; /* Darker green on hover */
             }
 
-        #profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-
-        #edit-picture-btn {
-            /* Remove background color and other styles */
-            background: none;
+        #sign-out-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
             border: none;
-            color: #007bff;
-            font-size: 24px;
+            border-radius: 5px;
             cursor: pointer;
-            margin-bottom: 20px;
+            font-size: 14px;
         }
 
-        #edit-picture-btn {
-            background-color: #28a745;
-            margin-bottom: 20px;
-        }
-
-            #edit-picture-btn:hover {
-                background-color: #1f8c3b;
+            #sign-out-btn:hover {
+                background-color: #555;
             }
     </style>
 </head>
 <body>
-
     <div id="profile-container">
-        <div class="container">
-            <h1>Cardiac Risk Predictor</h1>
-            <h2>User Profile</h2>
-        </div>
-        <div id="profile-picture-container">
-            <img id="profile-picture" src="default_profile_picture.jpg" alt="Profile Picture">
-            <button id="edit-picture-btn" onclick="openCameraModal()"><i class="fas fa-camera"></i></button>
-        </div>
-        <form id="profile-form">
+        <h1>Cardiac Risk Predictor</h1>
+        <h2>User Profile</h2>
+        <form method="post">
+            <label for="user_id">User ID:</label>
+            <input type="text" id="user_id" name="user_id" required>
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
-            <label for="user_id">User ID:</label>
-            <input type="text" id="user_id" name="user_id" required>
-            <label for="gender">Gender:</label>
-            <select id="gender" name="gender">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
-            <label for="address">Address:</label>
-            <textarea id="address" name="address" rows="4"></textarea>
             <label for="phone">Phone Number:</label>
             <input type="text" id="phone" name="phone" required>
-            <input type="submit" value="Save Profile">
+            <label for="address">Address:</label>
+            <textarea id="address" name="address" rows="4"></textarea>
+            <div class="button-container">
+                <input type="submit" value="Save Profile">
+                <button class="delete-btn">Delete Profile</button>
+            </div>
         </form>
-        <button class="delete-btn">Delete Profile</button>
     </div>
-    <script>
-        function openCameraModal() {
-            // Your code to handle opening the camera modal goes here
-            console.log("Camera icon clicked! Handle the action here.");
-        }
-    </script>
+
+    <button id="sign-out-btn">Sign Out</button>
+
 </body>
 </html>
-
