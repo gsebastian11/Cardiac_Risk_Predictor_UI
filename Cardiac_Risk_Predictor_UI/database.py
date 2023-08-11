@@ -1,5 +1,6 @@
 import pyodbc
 import app
+from werkzeug.security import check_password_hash
 
 # Database configuration
 #DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
@@ -14,6 +15,10 @@ class Login:
         self.id = user_id
         self.username = username
         self.password = password
+
+class UserProfile:
+    def __init__(self, user_id):
+        self.user_id = user_id
 
 
 def create_tables():
@@ -36,19 +41,19 @@ def create_tables():
         cursor.execute('''
             CREATE TABLE PatientDetails (
                 PatientID VARCHAR(50) PRIMARY KEY,
-                Age INT,
-                Gender FLOAT,
-                ChestPainType FLOAT,
-                RestingBP Float,
-                Cholesterol Float,
-                FastingBS Float,
-                RestingEcg Float,
-                Thalach Float,
-                ExAng Float,
-                DepressionInExersise Float,
-                SlopPeakExe Float,
-                NumMajVessels Float,
-                Thalassemia Float
+                age INT,
+                sex FLOAT,
+                cp FLOAT,
+                trestbps Float,
+                chol Float,
+                fbs Float,
+                restecg Float,
+                thalach Float,
+                exang Float,
+                oldpeak Float,
+                slope Float,
+                ca Float,
+                thal Float,
             )
         ''')
 
@@ -61,7 +66,6 @@ def create_tables():
                 UserId VARCHAR(50) REFERENCES Login(UserId),
                 Name VARCHAR(50),
                 EmailId VARCHAR(50),
-                Gender VARCHAR(10),
                 Address VARCHAR(100),
                 PhoneNumber BIGINT
             )
@@ -89,24 +93,24 @@ def insert_login_details(user_id, password):
     cursor.close()
     conn.close()
 
-def insert_patient_details(patient_id, age, gender, chest_pain_type, resting_bp, serum_cholestrole, fasting_bs, 
-                           resting_ecg, maximum_hr, exersise_ia, dep_indu_exersise, slope_peak_exer, num_vessles, thalassemia):
+def insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs, 
+                           restecg, thalach, exang, oldpeak, slope, ca, thal):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO PatientDetails (PatientID , UserId ,Age ,Gender ,ChestPainType ,RestingBP ,Cholesterol , FastingBS ,RestingEcg ,Thalach ,ExAng ,DepressionInExersise ,SlopPeakExe ,NumMajVessels ,Thalassemia ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                   (patient_id, age, gender, chest_pain_type, resting_bp, serum_cholestrole, fasting_bs, 
-                    resting_ecg, maximum_hr, exersise_ia, dep_indu_exersise, slope_peak_exer, num_vessles, thalassemia))
+    cursor.execute('INSERT INTO PatientDetails (PatientID , UserId ,age ,sex, cp, trestbps, chol, fbs ,restecg, thalach, exang, oldpeak, slope, ca, thal ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                   (patient_id, age, sex, cp, trestbps, chol, fbs, 
+                           restecg, thalach, exang, oldpeak, slope, ca, thal))
     conn.commit()
     cursor.close()
     conn.close()
 
-def insert_user_profile(patient_id, user_id, name, email, gender, address, phone_number):
+def insert_user_profile(patient_id, user_id, name, email, address, phone_number):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO UserProfile (PatientID, Name, EmailId, Gender, Address, PhoneNumber)
+        INSERT INTO UserProfile (PatientID, UserId, Name, EmailId, Address, PhoneNumber)
         VALUES (?, ?, ?, ?, ?, ?)
-    ''', (patient_id, name, email, gender, address, phone_number))
+    ''', (patient_id, user_id, name, email, address, phone_number))
     conn.commit()
     cursor.close()
     conn.close()
@@ -130,6 +134,19 @@ def update_user_info(user_id, password, email):
     cursor.close()
     conn.close()
 
+def update_user_profile(patient_id, user_id, name, email, address, phone_number):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE UserProfile
+        SET Name = ?, EmailId = ?, Address = ?, PhoneNumber = ?
+        WHERE PatientID = ? AND UserId = ?
+    ''', (name, email, address, phone_number, patient_id, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 #Select records
 def get_user_by_username(username):
     conn = get_db_connection()
@@ -147,5 +164,42 @@ def get_user_by_username(username):
         return user
     
     return None  # User not found
+
+def get_user_by_password(username, entered_password):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT UserId, Password FROM Login WHERE UserId = ?', (username,))
+    user_data = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if user_data:
+        user_id, hashed_password = user_data
+        #if check_password_hash(hashed_password, entered_password):
+        if (hashed_password == entered_password):
+            user = Login(user_id, username, hashed_password)  # Create a Login instance
+            return user
+    return None  # User not found or incorrect password
+
+#Select records
+def get_profile_by_username(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT UserId FROM UserProfile WHERE UserId = ?', (username,))
+    user_data = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if user_data:
+        user_id = user_data[0]  # Extract the user_id from the tuple
+        user = UserProfile(user_id)  # Create a UserProfile instance directly
+        return user
+    
+    return None  # User not found
+
 
 
