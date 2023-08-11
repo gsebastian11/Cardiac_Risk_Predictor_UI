@@ -19,17 +19,19 @@ class Login:
         return str(self.id) 
 
 class UserProfile:
-    def __init__(self, user_id):
-        self.user_id = user_id
-    
+    def __init__(self, user_id, name, email_id, address, phone_number):
+        self.user_id        = user_id
+        self.name           = name
+        self.email_id       = email_id
+        self.address        = address
+        self.phone_number   = phone_number
+
     def is_authenticated(self):
         return True
 
     def get_id(self):
         return str(self.id)
         
-
-
 def create_tables():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -197,7 +199,7 @@ def get_profile_by_username(username):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT UserId FROM UserProfile WHERE UserId = ?', (username,))
+    cursor.execute('SELECT UserId, Name, EmailId, Address, PhoneNumber FROM UserProfile WHERE UserId = ?', (username,))
     user_data = cursor.fetchone()
 
     cursor.close()
@@ -205,12 +207,11 @@ def get_profile_by_username(username):
 
     if user_data:
         user_id = user_data[0]  # Extract the user_id from the tuple
-        #patient_id = user_data[1]
-        #name = user_data[2], 
-        #email_id = user_data[3],
-        #address = user_data[4],
-        #phone_number = user_data[5]
-        user = UserProfile(user_id)  # Create a UserProfile instance directly
+        name = user_data[1], 
+        email_id = user_data[2],
+        address = user_data[3],
+        phone_number = user_data[4]
+        user = UserProfile(user_id,name,email_id,address,phone_number)  # Create a UserProfile instance directly
         #user = UserProfile(user_id,patient_id,name,email_id,address,phone_number)
         return user
     

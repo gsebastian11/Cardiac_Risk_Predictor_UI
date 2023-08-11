@@ -9,7 +9,7 @@
                class="form-control"
                id="user_id"
                name="user_id"
-               placeholder="Enter user id" 
+               placeholder="Enter user id"  
                value="{{ user_profile.user_id if user_profile else '' }}"
                readonly />
     </div>
@@ -19,7 +19,8 @@
                class="form-control"
                id="name"
                name="name"
-               placeholder="Enter name" />
+               placeholder="Enter name" 
+               value="{{ user_profile.name if user_profile else '' }}"/>
     </div>
     <div class="form-group">
         <label for="email">Email</label>
@@ -27,7 +28,8 @@
                class="form-control"
                id="email"
                name="email"
-               placeholder="Enter email" />
+               placeholder="Enter email" 
+               value="{{ user_profile.email_id if user_profile else '' }}"/>
     </div>
     <div class="form-group">
         <label for="phone">Phone Number</label>
@@ -35,7 +37,8 @@
                class="form-control"
                id="phone"
                name="phone"
-               placeholder="Enter phone number" />
+               placeholder="Enter phone number" 
+               value="{{ user_profile.phone_number if user_profile else '' }}"/>
     </div>
     <div class="form-group">
         <label for="address">Address</label>
@@ -43,7 +46,8 @@
                class="form-control"
                id="address"
                name="address"
-               placeholder="Enter address" />
+               placeholder="Enter address" 
+               value="{{ user_profile.address if user_profile else '' }}"/>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
