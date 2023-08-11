@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
 %}
-<form method="POST">
+<form method="POST" action="{{ url_for('patient_details') }}">
     <h3 align="center">Cardiac Risk Predictor</h3>
     <h3 align="center">Patient details</h3>
     <div class="form-group">
@@ -108,9 +108,9 @@
     <div class="form-group">
         <label for="thal">Thalassemia:</label>
         <select id="thal" name="thal" required>
-            <option value="0">Normal</option>
-            <option value="1">Fixed Defect</option>
-            <option value="2">Reversible Defect</option>
+            <option value="1">Normal</option>
+            <option value="2">Fixed Defect</option>
+            <option value="3">Reversible Defect</option>
         </select>
     </div>
 

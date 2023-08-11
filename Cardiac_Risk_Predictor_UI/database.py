@@ -19,6 +19,11 @@ class Login:
 class UserProfile:
     def __init__(self, user_id):
         self.user_id = user_id
+        #self.patient_id = patient_id
+        #self.name = name, 
+        #self.email_id = email_id,
+        #self.address = address,
+        #self.phone_number = phone_number
 
 
 def create_tables():
@@ -97,7 +102,7 @@ def insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs,
                            restecg, thalach, exang, oldpeak, slope, ca, thal):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO PatientDetails (PatientID , UserId ,age ,sex, cp, trestbps, chol, fbs ,restecg, thalach, exang, oldpeak, slope, ca, thal ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    cursor.execute('INSERT INTO PatientDetails (PatientID , age ,sex, cp, trestbps, chol, fbs ,restecg, thalach, exang, oldpeak, slope, ca, thal ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                    (patient_id, age, sex, cp, trestbps, chol, fbs, 
                            restecg, thalach, exang, oldpeak, slope, ca, thal))
     conn.commit()
@@ -196,7 +201,13 @@ def get_profile_by_username(username):
 
     if user_data:
         user_id = user_data[0]  # Extract the user_id from the tuple
+        #patient_id = user_data[1]
+        #name = user_data[2], 
+        #email_id = user_data[3],
+        #address = user_data[4],
+        #phone_number = user_data[5]
         user = UserProfile(user_id)  # Create a UserProfile instance directly
+        #user = UserProfile(user_id,patient_id,name,email_id,address,phone_number)
         return user
     
     return None  # User not found

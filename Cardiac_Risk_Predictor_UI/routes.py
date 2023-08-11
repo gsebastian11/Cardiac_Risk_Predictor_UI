@@ -1,7 +1,9 @@
+import json
 from flask import redirect, render_template, request, session, url_for, jsonify, flash
 from app import app
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_profile_by_username, get_user_by_password, insert_patient_details
+from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
 from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
 
 class Login(UserMixin):
@@ -21,6 +23,16 @@ class Login(UserMixin):
 
     def is_authenticated(self):
         return True
+
+def send_http_post_request(url, payload):
+    try:
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()
+        return response
+    except requests.exceptions.RequestException as e:
+        print(f'Error occurred during the request: {e}')
+    return None
             
 def configure_routes(app):
     @app.route('/', methods=['GET', 'POST'])
@@ -47,9 +59,12 @@ def configure_routes(app):
                     insert_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)
 
                 # Return a response indicating the success of the update
-                return render_template('user_profile.html',user=current_user)
+                return render_template('patient_details.html',user=current_user)
 
-            return render_template('user_profile.html',user=current_user)
+            # Fetch and display user profile if logged in
+            user_profile = get_profile_by_username(current_user.user_id)
+    
+            return render_template('user_profile.html',user=current_user, user_profile=user_profile)
 
         except Exception as e:
             return render_template('error.html', error=str(e))
@@ -124,8 +139,8 @@ def configure_routes(app):
 
             if request.method == 'POST':
             # Fetch data from the POST request
-                 
-                patient_id = current_user.id       
+
+                patient_id = current_user.id     
                 age = int(request.form['age'])
                 sex = int(request.form['sex'])
                 cp = int(request.form['cp'])
@@ -143,16 +158,57 @@ def configure_routes(app):
 
                 # Call the insert_patient_data function with the fetched data
                 insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal)
-            
-                # Return a response indicating the success of the update
-                return render_template('prediction_result.html',user=current_user)
 
-            return render_template('patient_details.html', user=current_user)
+                # Call prediction api
+                url = 'https://cardiac-risk-predictor-api.onrender.com/predict'  
+                payload = {
+                    "age": age,
+                    "sex": sex,
+                    "cp":cp,
+                    "trestbps": trestbps,
+                    "chol" : chol,
+                    "fbs" : fbs,
+                    "restecg": restecg,
+                    "thalach" : thalach,
+                    "exang" :exang,
+                    "oldpeak" : oldpeak,
+                    "slope": slope,
+                    "ca" :ca,
+                    "thal" : thal
+                }
+
+                response = send_http_post_request(url, payload)
+                if response:
+                    if(int(response[1]) == 1):
+                        prediction_result = "High risk of heart disease"
+                    else:
+                        prediction_result = "No risk"
+
+                    # Call the insert_prediction_result function with the fetched data
+                    insert_prediction_result(patient_id, int(response[1]))
+
+                    # Return a response indicating the success of the update
+                    return render_template('prediction_result.html',user=current_user,  prediction_result = prediction_result )
+                else:
+                    return render_template('error.html', error="Sorry, We are experiencing an issue. Please try again later.")
+
+            return render_template('patient_details.html', user=current_user )
 
         except Exception as e:
             return render_template('error.html', error=str(e))
 
-    def go_to_profile():
+
+@app.route('/prediction_result', methods=['GET', 'POST'])
+    #@login_required
+def prediction_result():
+    try: 
+
+        return render_template('patient_details.html', user=current_user)
+    except Exception as e:
+        return render_template('error.html', error=str(e))
+    
+
+def go_to_profile():
         try:
             return redirect(url_for('userprofile', user=current_user))  # Redirect to the 'userprofile' route
         except Exception as e:

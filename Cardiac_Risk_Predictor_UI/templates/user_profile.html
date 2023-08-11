@@ -9,7 +9,8 @@
                class="form-control"
                id="user_id"
                name="user_id"
-               placeholder="Enter user id" />
+               placeholder="Enter user id" 
+               value="{{ user_profile.user_id if user_profile else '' }}"/>
     </div>
     <div class="form-group">
         <label for="name">Name</label>
