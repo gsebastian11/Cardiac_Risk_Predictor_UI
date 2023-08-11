@@ -6,23 +6,23 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
 from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
 
-class Login(UserMixin):
-    def __init__(self, user_id, username, password):
-        self.id = user_id
-        self.username = username
-        self.password = password
+#class Login(UserMixin):
+#    def __init__(self, user_id, username, password):
+#        self.id = user_id
+#        self.username = username
+#        self.password = password
 
-    def get_id(self):
-        return self.id
+#    def get_id(self):
+#        return self.id
 
-    def is_active(self):
-        return True
+#    def is_active(self):
+#        return True
 
-    def is_anonymous(self):
-        return False
+#    def is_anonymous(self):
+#        return False
 
-    def is_authenticated(self):
-        return True
+#    def is_authenticated(self):
+#        return True
 
 def send_http_post_request(url, payload):
     try:
@@ -36,11 +36,11 @@ def send_http_post_request(url, payload):
             
 def configure_routes(app):
     @app.route('/', methods=['GET', 'POST'])
-    #@login_required
+    @login_required
     def userprofile():
         try: 
-            if 'username' not in session:
-                return redirect(url_for('login', user=current_user))
+            #if 'username' not in session:
+                #return redirect(url_for('login', user=current_user))
 
             if request.method == 'POST':
                 # Fetch data from the POST request
@@ -89,7 +89,8 @@ def configure_routes(app):
                     flash('Password must be at least 7 characters.', category='error')
                 else:
                     insert_login_details(username, password)
-                    session['username'] = username
+                    #session['username'] = username
+                    login_user(new_user, remember=True,duration=None,force=True)
                     flash('Account created!', category='success')
                     return render_template('login.html', user=current_user)
             return render_template('registration.html', user=current_user)
@@ -112,8 +113,8 @@ def configure_routes(app):
 
                 if user:
                     flash('Logged in successfully!', category='success')
-                    #login_user(user, remember=True)
-                    session['username'] = username
+                    login_user(user, remember=True,duration=None,force=True)
+                    #session['username'] = username
                     return redirect(url_for('userprofile', user=current_user))
                 else:
                     flash('Username or password is incorrect.', category='error')
