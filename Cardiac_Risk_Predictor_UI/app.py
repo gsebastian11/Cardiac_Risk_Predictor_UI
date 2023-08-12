@@ -1,16 +1,16 @@
-from flask import Flask
-from flask import redirect, render_template, request, session, url_for, jsonify
 import routes
-from database import create_tables, insert_login_details, insert_patient_details, get_profile_by_username,insert_user_profile, insert_prediction_result
-from flask_login import UserMixin, login_user, current_user, login_required, logout_user,LoginManager
+from flask import Flask
 from database import Login
+from flask import redirect, render_template, request, session, url_for, jsonify
+from flask_login import UserMixin, login_user, current_user, login_required, logout_user,LoginManager
+from database import create_tables, insert_login_details, insert_patient_details, get_profile_by_username,insert_user_profile, insert_prediction_result
 
 
-app = Flask(__name__)
-app.secret_key = "cardiac_predictor_9876"
+app             = Flask(__name__)
+app.secret_key  = "cardiac_predictor_9876"
 
-login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager               = LoginManager()
+login_manager.login_view    = 'login'
 login_manager.init_app(app)
 
 @login_manager.user_loader
