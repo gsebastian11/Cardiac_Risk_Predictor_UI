@@ -1,5 +1,6 @@
-{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content
-    %}
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
 <form method="POST">
     <h3 align="center">Cardiac Risk Predictor</h3>
     <h3 align="center">Login</h3>
@@ -9,7 +10,7 @@
                class="form-control"
                id="username"
                name="username"
-               placeholder="Enter username" />
+               placeholder="Enter username" required />
     </div>
     <div class="form-group">
         <label for="password">Password</label>
@@ -17,8 +18,9 @@
                class="form-control"
                id="password"
                name="password"
-               placeholder="Enter password" />
+               placeholder="Enter password" required />
     </div>
+    
     <br />
     <a href="{{ url_for('userprofile') }}" class="forgot-password">Forgot Password?</a>
     <button type="submit" class="btn btn-primary">Login</button>

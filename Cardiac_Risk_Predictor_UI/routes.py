@@ -1,6 +1,6 @@
 import json
 import requests
-from app import app
+import app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect, render_template, request, session, url_for, jsonify, flash
 from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
