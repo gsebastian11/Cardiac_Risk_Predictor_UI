@@ -5,8 +5,9 @@ import uuid
 from werkzeug.security import check_password_hash
 
 # Database configuration
-#DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
-DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
+
+DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
+#DATABASE = 'Driver={SQL Server};Server=NILEENA\SQLEXPRESS;Database=CardiacRiskPredictor;User=nileenadt;Password=Nileenadt123;'
 
 def get_db_connection():
     return pyodbc.connect(DATABASE)
