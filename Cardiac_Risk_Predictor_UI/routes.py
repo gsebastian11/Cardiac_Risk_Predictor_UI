@@ -160,11 +160,19 @@ def configure_routes(app):
                     suggestion = None
                     if(response['prediction_result'] == '[1]'):
                         prediction_result = "High risk of heart disease"
-                        suggestion = "abcd"
+                        suggestion = (
+                           "\nFollow Medical Advice\n" 
+                          "\nPhysical Activity as advised\n" 
+                          "\nEat Mindfully\n"
+                        )
                         risk_score = 1
                     else:
                         prediction_result = "No risk"
-                        suggestion = "efhh"
+                        suggestion = ( 
+                            " \nStay Healthy\n"
+                           "\nEat and Sleep well\n"
+                          "\nPortion control\n"
+                        )
                         risk_score = 0
 
                     patient_recid = get_patient_details_id(patient_id)
