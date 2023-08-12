@@ -1,10 +1,10 @@
 import json
-from flask import redirect, render_template, request, session, url_for, jsonify, flash
-from app import app
 import requests
+from app import app
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_patient_details_id,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
+from flask import redirect, render_template, request, session, url_for, jsonify, flash
 from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
+from database import insert_user_profile, update_user_profile,insert_login_details,insert_login_activity,insert_logout_activity, get_user_by_username,get_patient_details_id,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
 
 def send_http_post_request(url, payload):
     try:
@@ -65,14 +65,14 @@ def configure_routes(app):
                 elif len(password) < 7:
                     flash('Password must be at least 7 characters.', category='error')
                 else:
-                    insert_login_details(username, password)
-                    #insert_user_profile(patient_id=username, user_id=username, name='', email='',address='', phone_number='')
-                    #session['username'] = username
+                    insert_login_details(username, password)#Insert user data
                     new_user = get_user_by_username(username)
                     login_user(new_user, remember=True,duration=None,force=True)
                     flash('Account created!', category='success')
                     return render_template('login.html', user=current_user)
+
             return render_template('registration.html', user=current_user)
+
         except Exception as e:
             return render_template('error.html', error=str(e))
 
@@ -86,14 +86,12 @@ def configure_routes(app):
                 password = request.form['password']
 
                 # Retrieve user by username and password from the database
-                
-                #user = Login.query.filter_by(username=username, password=password).first()
                 user = get_user_by_password(username, password)
-                #force = False;
+                
                 if user:
                     flash('Logged in successfully!', category='success')
                     login_user(user, remember=True,duration=None,force=True)
-                    #session['username'] = username
+                    insert_login_activity(username)
                     return redirect(url_for('userprofile', user=current_user))
                 else:
                     flash('Username or password is incorrect.', category='error')
@@ -104,9 +102,11 @@ def configure_routes(app):
         except Exception as e:
             return render_template('error.html', error=str(e))
 
+    # Define the logout route
     @app.route('/logout')
     @login_required
     def logout():
+        insert_logout_activity(current_user.user_id)
         logout_user()
         return redirect(url_for('login'))
 
@@ -114,24 +114,23 @@ def configure_routes(app):
     @login_required
     def patient_details():
         try: 
-
-            if request.method == 'POST':
+            
             # Fetch data from the POST request
-
-                patient_id = current_user.user_id     
-                age = int(request.form['age'])
-                sex = int(request.form['sex'])
-                cp = int(request.form['cp'])
-                trestbps = int(request.form['trestbps'])
-                restecg = int(request.form['restecg'])
-                chol = int(request.form['chol'])
-                fbs = int(request.form['fbs'])
-                thalach = int(request.form['thalach'])
-                exang = int(request.form['exang'])
-                oldpeak = float(request.form['oldpeak'])
-                slope = int(request.form['slope'])
-                ca = int(request.form['ca'])
-                thal = int(request.form['thal'])
+            if request.method == 'POST':
+                patient_id  = current_user.user_id     
+                age         = int(request.form['age'])
+                sex         = int(request.form['sex'])
+                cp          = int(request.form['cp'])
+                trestbps    = int(request.form['trestbps'])
+                restecg     = int(request.form['restecg'])
+                chol        = int(request.form['chol'])
+                fbs         = int(request.form['fbs'])
+                thalach     = int(request.form['thalach'])
+                exang       = int(request.form['exang'])
+                oldpeak     = float(request.form['oldpeak'])
+                slope       = int(request.form['slope'])
+                ca          = int(request.form['ca'])
+                thal        = int(request.form['thal'])
             
 
                 # Call the insert_patient_data function with the fetched data
@@ -182,25 +181,18 @@ def configure_routes(app):
         except Exception as e:
             return render_template('error.html', error=str(e))
 
-
 @app.route('/prediction_result', methods=['GET', 'POST'])
-    #@login_required
 def prediction_result():
     try: 
 
         return render_template('patient_details.html', user=current_user)
+
     except Exception as e:
         return render_template('error.html', error=str(e))
     
-
 def go_to_profile():
         try:
             return redirect(url_for('userprofile', user=current_user))  # Redirect to the 'userprofile' route
         except Exception as e:
             return render_template('error.html', error=str(e))
 
-def health_record_exists(patient_id):
-     #Function to check if the health record exists for the given patient_id
-     #You can implement this function based on your database query logic
-     #For simplicity, we assume it always returns False here
-    return False
