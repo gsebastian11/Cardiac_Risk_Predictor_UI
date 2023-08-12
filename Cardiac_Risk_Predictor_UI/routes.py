@@ -3,7 +3,7 @@ from flask import redirect, render_template, request, session, url_for, jsonify,
 from app import app
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
+from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_patient_details_id,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
 from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
 
 def send_http_post_request(url, payload):
@@ -66,7 +66,7 @@ def configure_routes(app):
                     flash('Password must be at least 7 characters.', category='error')
                 else:
                     insert_login_details(username, password)
-                    insert_user_profile(patient_id=username, user_id=username, name='', email='',address='', phone_number='')
+                    #insert_user_profile(patient_id=username, user_id=username, name='', email='',address='', phone_number='')
                     #session['username'] = username
                     new_user = get_user_by_username(username)
                     login_user(new_user, remember=True,duration=None,force=True)
@@ -114,8 +114,6 @@ def configure_routes(app):
     @login_required
     def patient_details():
         try: 
-            #if 'username' not in session:
-            #    return redirect(url_for('login', user=current_user))
 
             if request.method == 'POST':
             # Fetch data from the POST request
@@ -170,8 +168,9 @@ def configure_routes(app):
                         suggestion = "efhh"
                         risk_score = 0
 
+                    patient_recid = get_patient_details_id(patient_id)
                     # Call the insert_prediction_result function with the fetched data
-                    insert_prediction_result(patient_id, risk_score)
+                    insert_prediction_result(patient_recid ,risk_score)
 
                     # Return a response indicating the success of the update
                     return render_template('prediction_result.html',user=current_user,  prediction_result = prediction_result, suggestion = suggestion)
