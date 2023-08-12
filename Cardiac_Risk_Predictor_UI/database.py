@@ -13,9 +13,9 @@ def get_db_connection():
 
 class Login:
     def __init__(self, user_id, username, password):
-        self.id = user_id
-        self.username = username
-        self.password = password
+        self.id         = user_id
+        self.username   = username
+        self.password   = password
     def get_id(self):
         return str(self.id) 
 
@@ -45,8 +45,8 @@ class PatientDetails:
         return str(self.id)
         
 def create_tables():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn    = get_db_connection()
+    cursor  = conn.cursor()
 
     # Create Login table
     cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Login'")
@@ -59,6 +59,19 @@ def create_tables():
                 ModifiedDateTime DATETIME DEFAULT GETDATE()
             )
         ''')   
+
+    # Create LoginActivity table
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'LoginActivity'")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute('''
+            CREATE TABLE LoginActivity (
+                ActivityId INT IDENTITY(1,1) PRIMARY KEY,
+                UserId VARCHAR(50) REFERENCES Login(UserId),
+                LoginTime DATETIME,
+                LogoutTime DATETIME,
+                CONSTRAINT CHK_LogoutTime CHECK (LogoutTime >= LoginTime)
+            )
+        ''')
 
     # Create UserProfile table
     cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'UserProfile'")
@@ -114,13 +127,13 @@ def create_tables():
 
     conn.commit()
     cursor.close()
-    conn.close()
+    conn.close()      
 
+#Insert into table Login
 def insert_login_details(user_id, password):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # Get the current timestamp
-    current_datetime = datetime.datetime.now()
+    conn                = get_db_connection()
+    cursor              = conn.cursor()    
+    current_datetime    = datetime.datetime.now()# Get the current timestamp
 
     cursor.execute('''
         INSERT INTO Login (UserId, Password, CreatedDateTime, ModifiedDateTime)
@@ -136,15 +149,44 @@ def insert_login_details(user_id, password):
     cursor.close()
     conn.close()
 
+def insert_login_activity(user_id):
+    conn    = get_db_connection()
+    cursor  = conn.cursor()
+
+    current_datetime = datetime.datetime.now()
+
+    cursor.execute('''
+        INSERT INTO LoginActivity (UserId, LoginTime)
+        VALUES (?, ?)
+    ''', (user_id, current_datetime))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def insert_logout_activity(user_id):
+    conn    = get_db_connection()
+    cursor  = conn.cursor()
+
+    current_datetime = datetime.datetime.now()
+
+    cursor.execute('''
+        UPDATE LoginActivity
+        SET LogoutTime = ?
+        WHERE UserId = ? AND LogoutTime IS NULL
+    ''', (current_datetime, user_id))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 def insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs, 
                            restecg, thalach, exang, oldpeak, slope, ca, thal):
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn    = get_db_connection()
+    cursor  = conn.cursor()
 
-    # Get the current timestamp
-    current_datetime = datetime.datetime.now()
-    # Generate a unique identifier using UUID
-    patient_recid = str(uuid.uuid4())
+    current_datetime    = datetime.datetime.now()# Get the current timestamp
+    patient_recid       = str(uuid.uuid4())# Generate a unique identifier using UUID    
 
 
     cursor.execute('''
@@ -163,8 +205,8 @@ def insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs,
     conn.close()
 
 def insert_user_profile(patient_id, user_id, name, email, address, phone_number):
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn    = get_db_connection()
+    cursor  = conn.cursor()
 
     # Get the current timestamp
     current_datetime = datetime.datetime.now()
@@ -182,8 +224,8 @@ def insert_user_profile(patient_id, user_id, name, email, address, phone_number)
 
 
 def insert_prediction_result(patient_recid, risk_score):
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn    = get_db_connection()
+    cursor  = conn.cursor()
 
     # Get the current timestamp
     current_datetime = datetime.datetime.now()
