@@ -181,14 +181,14 @@ def configure_routes(app):
         except Exception as e:
             return render_template('error.html', error=str(e))
 
-@app.route('/prediction_result', methods=['GET', 'POST'])
-def prediction_result():
-    try: 
+        @app.route('/prediction_result', methods=['GET', 'POST'])
+        def prediction_result():
+            try: 
 
-        return render_template('patient_details.html', user=current_user)
+                return render_template('patient_details.html', user=current_user)
 
-    except Exception as e:
-        return render_template('error.html', error=str(e))
+            except Exception as e:
+                return render_template('error.html', error=str(e))
     
 def go_to_profile():
         try:
