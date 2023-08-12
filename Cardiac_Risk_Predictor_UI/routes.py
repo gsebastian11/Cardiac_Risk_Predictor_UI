@@ -3,33 +3,15 @@ from flask import redirect, render_template, request, session, url_for, jsonify,
 from app import app
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
+from database import insert_user_profile, update_user_profile,insert_login_details, get_user_by_username,get_patient_details_id,get_profile_by_username, get_user_by_password, insert_patient_details, insert_prediction_result
 from flask_login import current_user, fresh_login_required,UserMixin, login_user,login_required, logout_user
-
-#class Login(UserMixin):
-#    def __init__(self, user_id, username, password):
-#        self.id = user_id
-#        self.username = username
-#        self.password = password
-
-#    def get_id(self):
-#        return self.id
-
-#    def is_active(self):
-#        return True
-
-#    def is_anonymous(self):
-#        return False
-
-#    def is_authenticated(self):
-#        return True
 
 def send_http_post_request(url, payload):
     try:
         headers = {'Content-Type': 'application/json'}
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response.raise_for_status()
-        return response
+        return response.json()
     except requests.exceptions.RequestException as e:
         print(f'Error occurred during the request: {e}')
     return None
@@ -38,23 +20,18 @@ def configure_routes(app):
     @app.route('/', methods=['GET', 'POST'])
     @login_required
     def userprofile():
-        try: 
-            #if 'username' not in session:
-                #return redirect(url_for('login', user=current_user))
-
+        try:             
             if request.method == 'POST':
                 # Fetch data from the POST request
-                name = request.form['name']
-                email = request.form['email']
+                name    = request.form['name']
+                email   = request.form['email']
                 user_id = request.form['user_id']
                 address = request.form['address']
-                phone = request.form['phone']
+                phone   = request.form['phone']
             
-                # Correct the order of arguments for insert_user_profile function
                 user = get_profile_by_username(user_id)
                 if user:
-                    update_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)
-                    
+                    update_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)                    
                 else:
                     insert_user_profile(patient_id=user_id, user_id=user_id, name=name, email=email,address=address, phone_number=phone)
 
@@ -62,26 +39,26 @@ def configure_routes(app):
                 return render_template('patient_details.html',user=current_user)
 
             # Fetch and display user profile if logged in
-            user_profile = get_profile_by_username(current_user.user_id)
+            if(current_user):
+                user_profile = get_profile_by_username(current_user.user_id)
     
             return render_template('user_profile.html',user=current_user, user_profile=user_profile)
 
         except Exception as e:
             return render_template('error.html', error=str(e))
 
-
     @app.route('/registration', methods=['GET', 'POST'])
     def registration():
         try: 
             if request.method == 'POST':
                 # Fetch data from the POST request
-                username = request.form['username']
-                password = request.form['password']
-                confirmpwd = request.form.get('confirmPassword')
+                username    = request.form['username']
+                password    = request.form['password']
+                confirmpwd  = request.form.get('confirmPassword')
                 
                 # Check if the user already exists
-                new_user = get_user_by_username(username)
-                if new_user:
+                user = get_user_by_username(username)
+                if user:
                     flash('User already registered. Please use a different username.', category='error')
                 elif password != confirmpwd:
                     flash('Passwords don\'t match.', category='error')
@@ -89,7 +66,9 @@ def configure_routes(app):
                     flash('Password must be at least 7 characters.', category='error')
                 else:
                     insert_login_details(username, password)
+                    #insert_user_profile(patient_id=username, user_id=username, name='', email='',address='', phone_number='')
                     #session['username'] = username
+                    new_user = get_user_by_username(username)
                     login_user(new_user, remember=True,duration=None,force=True)
                     flash('Account created!', category='success')
                     return render_template('login.html', user=current_user)
@@ -135,13 +114,11 @@ def configure_routes(app):
     @login_required
     def patient_details():
         try: 
-            #if 'username' not in session:
-            #    return redirect(url_for('login', user=current_user))
 
             if request.method == 'POST':
             # Fetch data from the POST request
 
-                patient_id = current_user.id     
+                patient_id = current_user.user_id     
                 age = int(request.form['age'])
                 sex = int(request.form['sex'])
                 cp = int(request.form['cp'])
@@ -162,7 +139,7 @@ def configure_routes(app):
 
                 # Call prediction api
                 url = 'https://cardiac-risk-predictor-api.onrender.com/predict'  
-                payload = {
+                payload = [{
                     "age": age,
                     "sex": sex,
                     "cp":cp,
@@ -176,20 +153,27 @@ def configure_routes(app):
                     "slope": slope,
                     "ca" :ca,
                     "thal" : thal
-                }
+                }]
 
                 response = send_http_post_request(url, payload)
                 if response:
-                    if(int(response[1]) == 1):
+                    risk_score = None
+                    suggestion = None
+                    if(response['prediction_result'] == '[1]'):
                         prediction_result = "High risk of heart disease"
+                        suggestion = "abcd"
+                        risk_score = 1
                     else:
                         prediction_result = "No risk"
+                        suggestion = "efhh"
+                        risk_score = 0
 
+                    patient_recid = get_patient_details_id(patient_id)
                     # Call the insert_prediction_result function with the fetched data
-                    insert_prediction_result(patient_id, int(response[1]))
+                    insert_prediction_result(patient_recid ,risk_score)
 
                     # Return a response indicating the success of the update
-                    return render_template('prediction_result.html',user=current_user,  prediction_result = prediction_result )
+                    return render_template('prediction_result.html',user=current_user,  prediction_result = prediction_result, suggestion = suggestion)
                 else:
                     return render_template('error.html', error="Sorry, We are experiencing an issue. Please try again later.")
 
