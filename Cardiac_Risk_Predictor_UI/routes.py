@@ -160,11 +160,19 @@ def configure_routes(app):
                     suggestion = None
                     if(response['prediction_result'] == '[1]'):
                         prediction_result = "High risk of heart disease"
-                        suggestion = "abcd"
+                        suggestion = (
+                           "\nFollow Medical Advice\n" 
+                          "\nPhysical Activity as advised\n" 
+                          "\nEat Mindfully\n"
+                        )
                         risk_score = 1
                     else:
                         prediction_result = "No risk"
-                        suggestion = "efhh"
+                        suggestion = ( 
+                            " \nStay Healthy\n"
+                           "\nEat and Sleep well\n"
+                          "\nPortion control\n"
+                        )
                         risk_score = 0
 
                     patient_recid = get_patient_details_id(patient_id)
@@ -181,14 +189,14 @@ def configure_routes(app):
         except Exception as e:
             return render_template('error.html', error=str(e))
 
-@app.route('/prediction_result', methods=['GET', 'POST'])
-def prediction_result():
-    try: 
+        @app.route('/prediction_result', methods=['GET', 'POST'])
+        def prediction_result():
+            try: 
 
-        return render_template('patient_details.html', user=current_user)
+                return render_template('patient_details.html', user=current_user)
 
-    except Exception as e:
-        return render_template('error.html', error=str(e))
+            except Exception as e:
+                return render_template('error.html', error=str(e))
     
 def go_to_profile():
         try:

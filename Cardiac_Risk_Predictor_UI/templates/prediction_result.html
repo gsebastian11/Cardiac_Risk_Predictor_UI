@@ -1,10 +1,23 @@
+
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
 <div id="result-container">
-    <h1>Cardiac Risk Predictor</h1>
-    <h2>Your Heart Health prediction Result:</h2>
-    <p>{{ prediction_result}}</p>
-    <p>{{ suggestion}}</p>
+    <h1 align="center"> Cardiac Risk Predictor</h1>
+</div>
+<div id="result-container">
+    <h2 align="center"> Your Heart Health prediction Result </h2>
+</div>
+<div id="result-container">
+    <h2>Prediction Result:</h2>
+</div>
+<div>
+    <p> <h3> {{ prediction_result}}</h3> </p>
+    <p> <h3> {{ suggestion}}</h3> </p>
 </div>
 {% endblock %}
+
+
+
+
+
