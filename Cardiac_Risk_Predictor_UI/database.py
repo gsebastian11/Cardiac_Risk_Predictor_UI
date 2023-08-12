@@ -1,4 +1,6 @@
+import os
 import pyodbc
+import psycopg2
 import app
 import datetime
 import uuid
@@ -6,10 +8,24 @@ from werkzeug.security import check_password_hash
 
 # Database configuration
 #DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
-DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
+#DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
 
+
+##local
+#db_host = "dpg-cjbbu5fdb61s73f8pdk0-a.oregon-postgres.render.com"
+#db_user = "admin"
+#db_password = "GzYgZi2hd32JM797Oxr6imkGalLx3edV"
+#db_name = "cardiacriskpredictor"
+
+#prod
+db_host = os.environ['DB_HOST']
+db_user = os.environ['DB_USER']
+db_password = os.environ['DB_PASSWORD']
+db_name = os.environ['DB_NAME']
+
+DATABASE = f"dbname={db_name} user={db_user} password={db_password} host={db_host} port=5432 sslmode='require'"
 def get_db_connection():
-    return pyodbc.connect(DATABASE)
+    return psycopg2.connect(DATABASE)
 
 class Login:
     def __init__(self, user_id, username, password):
@@ -49,32 +65,32 @@ def create_tables():
     cursor  = conn.cursor()
 
     # Create Login table
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Login'")
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'login'")
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
             CREATE TABLE Login (
                 UserId VARCHAR(50) PRIMARY KEY,
                 Password VARCHAR(50),
-                CreatedDateTime DATETIME DEFAULT GETDATE(),
-                ModifiedDateTime DATETIME DEFAULT GETDATE()
+                CreatedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ModifiedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')   
 
     # Create LoginActivity table
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'LoginActivity'")
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'loginactivity'")
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
             CREATE TABLE LoginActivity (
-                ActivityId INT IDENTITY(1,1) PRIMARY KEY,
+                ActivityId SERIAL PRIMARY KEY,
                 UserId VARCHAR(50) REFERENCES Login(UserId),
-                LoginTime DATETIME,
-                LogoutTime DATETIME,
+                LoginTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                LogoutTime TIMESTAMP,
                 CONSTRAINT CHK_LogoutTime CHECK (LogoutTime >= LoginTime)
             )
         ''')
 
     # Create UserProfile table
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'UserProfile'")
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'userprofile'")
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
             CREATE TABLE UserProfile (
@@ -84,13 +100,13 @@ def create_tables():
                 EmailId VARCHAR(50),
                 Address VARCHAR(100),
                 PhoneNumber BIGINT,
-                CreatedDateTime DATETIME DEFAULT GETDATE(),
-                ModifiedDateTime DATETIME DEFAULT GETDATE()
+                CreatedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ModifiedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
     # Create PatientDetails table
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PatientDetails'")
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'patientdetails'")
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
             CREATE TABLE PatientDetails (
@@ -110,18 +126,18 @@ def create_tables():
                 slope Float,
                 ca Float,
                 thal Float,
-                CreatedDateTime DATETIME DEFAULT GETDATE()
+                CreatedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
     # Create PredictionResult table
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PredictionResult'")
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'predictionresult'")
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
             CREATE TABLE PredictionResult (
                 PatientRecid VARCHAR(50) REFERENCES PatientDetails(PatientRecid),
                 RiskScore INT,
-                CreatedDateTime DATETIME DEFAULT GETDATE()
+                CreatedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
@@ -131,20 +147,20 @@ def create_tables():
 
 #Insert into table Login
 def insert_login_details(user_id, password):
-    conn                = get_db_connection()
-    cursor              = conn.cursor()    
-    current_datetime    = datetime.datetime.now()# Get the current timestamp
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Get the current timestamp
 
     cursor.execute('''
-        INSERT INTO Login (UserId, Password, CreatedDateTime, ModifiedDateTime)
-        VALUES (?, ?, ?, ?)
-    ''', (user_id, password, current_datetime, ''))
+        INSERT INTO Login (UserId, Password)
+        VALUES (%s, %s)
+    ''', (user_id, password))
     cursor.execute('''
         INSERT INTO UserProfile (
-            PatientID, UserId, Name, EmailId, Address, PhoneNumber, CreatedDateTime, ModifiedDateTime
+            PatientID, UserId, Name, EmailId, Address, PhoneNumber
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (user_id, user_id, '', '', '', '', current_datetime, ''))
+        VALUES (%s, %s, %s, %s, %s, %s)
+    ''', (user_id, user_id, '', '', '', 123456789))
     conn.commit()
     cursor.close()
     conn.close()
@@ -153,12 +169,11 @@ def insert_login_activity(user_id):
     conn    = get_db_connection()
     cursor  = conn.cursor()
 
-    current_datetime = datetime.datetime.now()
 
     cursor.execute('''
-        INSERT INTO LoginActivity (UserId, LoginTime)
-        VALUES (?, ?)
-    ''', (user_id, current_datetime))
+        INSERT INTO LoginActivity (UserId, LogoutTime)
+        VALUES (%s, %s)
+    ''', (user_id, None))
 
     conn.commit()
     cursor.close()
@@ -168,13 +183,11 @@ def insert_logout_activity(user_id):
     conn    = get_db_connection()
     cursor  = conn.cursor()
 
-    current_datetime = datetime.datetime.now()
-
     cursor.execute('''
         UPDATE LoginActivity
-        SET LogoutTime = ?
-        WHERE UserId = ? AND LogoutTime IS NULL
-    ''', (current_datetime, user_id))
+        SET LogoutTime = CURRENT_TIMESTAMP
+        WHERE UserId = %s AND LogoutTime IS NULL
+    ''', (user_id,))
 
     conn.commit()
     cursor.close()
@@ -194,7 +207,7 @@ def insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs,
             PatientRecid, PatientID, age, sex, cp, trestbps, chol, fbs, restecg, thalach,
             exang, oldpeak, slope, ca, thal, CreatedDateTime
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ''', (
         patient_recid, patient_id, age, sex, cp, trestbps, chol, fbs, restecg, thalach,
         exang, oldpeak, slope, ca, thal, current_datetime
@@ -215,7 +228,7 @@ def insert_user_profile(patient_id, user_id, name, email, address, phone_number)
         INSERT INTO UserProfile (
             PatientID, UserId, Name, EmailId, Address, PhoneNumber, CreatedDateTime, ModifiedDateTime
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     ''', (patient_id, user_id, name, email, address, phone_number, current_datetime, ''))
     
     conn.commit()
@@ -234,7 +247,7 @@ def insert_prediction_result(patient_recid, risk_score):
         INSERT INTO PredictionResult (
             PatientRecid, RiskScore, CreatedDateTime
         )
-        VALUES (?, ?, ?)
+        VALUES (%s, %s, %s)
     ''', (patient_recid, risk_score, current_datetime))
     
     conn.commit()
@@ -250,7 +263,7 @@ def update_user_info(user_id, password, email):
     cursor = conn.cursor()
     # Get the current timestamp
     current_datetime = datetime.datetime.now()
-    cursor.execute('UPDATE Login SET Password = ? WHERE UserId = ?', (password, user_id))
+    cursor.execute('UPDATE Login SET Password = %s WHERE UserId = %s', (password, user_id))
     conn.commit()
     cursor.close()
     conn.close()
@@ -266,8 +279,8 @@ def update_user_profile(patient_id, user_id, name, email, address, phone_number)
 
     cursor.execute('''
         UPDATE UserProfile
-        SET Name = ?, EmailId = ?, Address = ?, PhoneNumber = ?, ModifiedDateTime = ?
-        WHERE PatientID = ? AND UserId = ?
+        SET Name = %s, EmailId = %s, Address = %s, PhoneNumber = %s, ModifiedDateTime = %s
+        WHERE PatientID = %s AND UserId = %s
     ''', (name, email, address, phone_number, current_datetime, patient_id, user_id))
     conn.commit()
     cursor.close()
@@ -279,7 +292,7 @@ def get_user_by_username(username):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT UserId, Password FROM Login WHERE UserId = ?', (username,))
+    cursor.execute('SELECT UserId, Password FROM Login WHERE UserId = %s', (username,))
     user_data = cursor.fetchone()
 
     cursor.close()
@@ -296,7 +309,7 @@ def get_user_by_password(username, entered_password):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT UserId, Password FROM Login WHERE UserId = ?', (username,))
+    cursor.execute('SELECT UserId, Password FROM Login WHERE UserId = %s', (username,))
     user_data = cursor.fetchone()
 
     cursor.close()
@@ -315,7 +328,7 @@ def get_profile_by_username(username):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT UserId, Name, EmailId, Address, PhoneNumber FROM UserProfile WHERE UserId = ?', (username,))
+    cursor.execute('SELECT UserId, Name, EmailId, Address, PhoneNumber FROM UserProfile WHERE UserId = %s', (username,))
     user_data = cursor.fetchone()
 
     cursor.close()
@@ -338,7 +351,7 @@ def get_patient_details_id(patientid):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT PatientRecid, PatientID FROM PatientDetails WHERE PatientID = ?', (patientid,))
+    cursor.execute('SELECT PatientRecid, PatientID FROM PatientDetails WHERE PatientID = %s', (patientid,))
     user_data = cursor.fetchone()
 
     cursor.close()
