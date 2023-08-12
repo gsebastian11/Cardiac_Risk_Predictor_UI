@@ -7,3 +7,4 @@ psycopg2==2.9.7
 pyodbc==4.0.39
 pytest==7.4.0
 Werkzeug==2.3.6
+requests==2.26.0
