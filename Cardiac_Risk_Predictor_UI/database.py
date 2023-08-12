@@ -1,7 +1,6 @@
 import os
 import pyodbc
 import psycopg2
-import app
 import datetime
 import uuid
 from werkzeug.security import check_password_hash
