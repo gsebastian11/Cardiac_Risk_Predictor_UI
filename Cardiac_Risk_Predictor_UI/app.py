@@ -1,11 +1,4 @@
-#import routes
-#from flask import Flask
-#from database import Login
-#from flask import redirect, render_template, request, session, url_for, jsonify
-#from flask_login import UserMixin, login_user, current_user, login_required, logout_user,LoginManager
-#from database import create_tables, insert_login_details, insert_patient_details, get_profile_by_username,insert_user_profile, insert_prediction_result
-
-import json
+import json, re
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify, flash
@@ -87,10 +80,20 @@ def registration():
             user = get_user_by_username(username)
             if user:
                 flash('User already registered. Please use a different username.', category='error')
+            elif ' ' in username:  # Check for spaces in username
+                flash('Username cannot contain spaces.', category='error')
+            elif username == '':
+                flash('Username must be filled in', category='error')
             elif password != confirmpwd:
                 flash('Passwords don\'t match.', category='error')
             elif len(password) < 7:
                 flash('Password must be at least 7 characters.', category='error')
+            elif ' ' in password:  # Check for spaces in password
+                flash('Password cannot contain spaces.', category='error')
+            elif not re.search('[A-Z]', password):  # Check for at least one uppercase letter
+                flash('Password must contain at least one uppercase letter.', category='error')
+            elif not re.search('[!@#$%^&*(),.?":{}|<>]', password):  # Check for at least one special character
+                flash('Password must contain at least one special character.', category='error')
             else:
                 insert_login_details(username, password)#Insert user data
                 new_user = get_user_by_username(username)
@@ -116,10 +119,13 @@ def login():
             user = get_user_by_password(username, password)
                 
             if user:
-                flash('Logged in successfully!', category='success')
-                login_user(user, remember=True,duration=None,force=True)
-                insert_login_activity(username)
-                return redirect(url_for('userprofile', user=current_user))
+                if username == '':
+                    flash('Username must be filled in', category='error')
+                else:
+                    flash('Logged in successfully!', category='success')
+                    login_user(user, remember=True,duration=None,force=True)
+                    insert_login_activity(username)
+                    return redirect(url_for('userprofile', user=current_user))
             else:
                 flash('Username or password is incorrect.', category='error')
                 return render_template("login.html", user=current_user)
@@ -159,7 +165,6 @@ def patient_details():
             ca          = int(request.form['ca'])
             thal        = int(request.form['thal'])
             
-
             # Call the insert_patient_data function with the fetched data
             insert_patient_details(patient_id, age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal)
 
@@ -230,6 +235,7 @@ if __name__ == '__main__':
     #routes.configure_routes(app)
 
     app.run()
+
     #import os
     #HOST = os.environ.get('SERVER_HOST', 'localhost')
     #try:

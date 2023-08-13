@@ -5,7 +5,7 @@ import datetime
 import uuid
 from werkzeug.security import check_password_hash
 
-# Database configuration
+#Database configuration
 #DATABASE = 'Driver={SQL Server};Server=.\\SQLEXPRESS;Database=CardiacRiskPredictor;Trusted_Connection=yes;'
 #DATABASE = 'Driver={SQL Server};Server=LAPTOP-TOMKVT9U;Database=CardiacRiskPredictor;User=gifty;Password=ssgg1@3ggss;'
 
@@ -94,7 +94,7 @@ def create_tables():
         cursor.execute('''
             CREATE TABLE UserProfile (
                 PatientID VARCHAR(50) PRIMARY KEY,                
-                UserId VARCHAR(50) REFERENCES Login(UserId),
+                UserId VARCHAR(50) REFERENCES Login(UserId) ON DELETE CASCADE,
                 Name VARCHAR(50),
                 EmailId VARCHAR(50),
                 Address VARCHAR(100),
@@ -110,7 +110,7 @@ def create_tables():
         cursor.execute('''
             CREATE TABLE PatientDetails (
                 PatientRecid VARCHAR(50) PRIMARY KEY,
-                PatientID VARCHAR(50) REFERENCES UserProfile(PatientID),
+                PatientID VARCHAR(50) REFERENCES UserProfile(PatientID) ON DELETE CASCADE,
                 name VARCHAR(50),
                 age INT,
                 sex FLOAT,
@@ -134,7 +134,7 @@ def create_tables():
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
             CREATE TABLE PredictionResult (
-                PatientRecid VARCHAR(50) REFERENCES PatientDetails(PatientRecid),
+                PatientRecid VARCHAR(50) REFERENCES PatientDetails(PatientRecid)  ON DELETE CASCADE,
                 RiskScore INT,
                 CreatedDateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
